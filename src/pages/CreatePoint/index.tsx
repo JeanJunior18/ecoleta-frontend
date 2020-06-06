@@ -1,4 +1,4 @@
-import React, { useEffect, useState, ChangeEvent } from 'react';
+import React, { useEffect, useState, ChangeEvent, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { FiArrowLeft } from 'react-icons/fi';
 import { Map, TileLayer, Marker } from 'react-leaflet';
@@ -31,6 +31,7 @@ const Home: React.FC = () => {
 	const [ufs, setUfs]= useState<string[]>([]);
 	const [cities, setCities]= useState<string[]>([]);
 	const [selectedUf, setSelectedUf] = useState('0');
+	const [selectedCity, setSelectedCity] = useState('0');
 	const [selectedPosition, setSelectedPosition] = useState<[number, number]>([0,0])
 	const [selectedItems, setSelectedItems] = useState<number[]>([])
 	const [formData, setFormData] = useState({
@@ -83,7 +84,29 @@ const Home: React.FC = () => {
 		else{
 			setSelectedItems([...selectedItems, id])
 		}
+	}
 
+	async function handleSubmit(event: FormEvent){
+		event.preventDefault()
+
+		const { name, email, whatsapp } = formData;
+		const UF = selectedUf;
+		const city = selectedCity;
+		const [latitude, longitude] = selectedPosition;
+		const items = selectedItems;
+		const data = {
+			name,
+			email,
+			whatsapp,
+			UF,
+			city,
+			latitude,
+			longitude,
+			items,
+		}
+		console.log(data)
+		await api.post('points', data)
+		alert('Ponto Enviado')
 	}
 
 	return(
@@ -96,7 +119,7 @@ const Home: React.FC = () => {
 				</Link>
 			</header>
 
-			<form action="">
+			<form onSubmit={handleSubmit}>
 				<h1>Cadastro do <br/> ponto de coleta</h1>
 
 				<fieldset>
@@ -122,6 +145,7 @@ const Home: React.FC = () => {
 							onChange={handleInputChange}
 							/>
 						</div>
+
 						<div className="field">
 							<label htmlFor="whatsapp">Whatsapp</label>
 							<input
@@ -161,12 +185,14 @@ const Home: React.FC = () => {
 
 							<div className="field">
 								<label htmlFor="city">Cidade</label>
-								<select name="city" id="city">
+								<select name="city" id="city" onChange={e => setSelectedCity(e.target.value)}>
 									<option value="0">Selecione uma Cidade</option>
 									{cities.map(city => <option value={city} key={city}>{city}</option> )}
 								</select>
 							</div>
+
 						</div>
+
 				</fieldset>
 
 				<fieldset>
